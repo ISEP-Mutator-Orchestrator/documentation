@@ -1,5 +1,9 @@
 # Runner Interaction
+
+This document lists a set of APIs that are used for runner-orchestrator interaction.
+
 ## Register runner
+Description: This API is used to manually register the runner to the orchestrator. A UUID token is needed to register the runner. Currently, no auth function is provided so this token can be any UUID.
 #### URL
 POST /api/runner/registration
 #### Request
@@ -41,7 +45,10 @@ Request body
 ####  Response
 Status: 201 CREATED
 
+Description: The runner is registered successfully.
+
 Response body:
+
 ```json
 {
   "runner_id": "uuid string"
@@ -50,6 +57,7 @@ Response body:
 
 
 ## Deregister runner
+Description: The API is used to manually de-register the runner. The runner ID (UUID format) should be provided. The runner ID will be added to a blacklist. After de-registration, any following requests from this runner will be refused.
 #### URL
 DELETE /api/runner/registration
 #### Request
@@ -64,10 +72,14 @@ Status: 200 OK
 Response body: (empty)
 
 ## Heartbeat
+Description: The runner will regularly send a heartbeat request including the latest runner status. All the commands from the orchestrator to the runner should be included in this heartbeat response. This mechanism is designed in case the runner is in an internal network or behind a proxy or firewall.
 #### URL
 POST /api/runner/heartbeat
 #### Request
-Request body
+
+Description: Currently, the supporting framework and dependencies are included in the heartbeat request. The information provided in the request will be saved in orchestrator 
+
+Request body:
 ```json
 {
   "id": "uuid of runner",
@@ -87,7 +99,8 @@ Request body
 }
 ```
 #### Response
-If the runner is ok 
+Description: If the orchestrator is ok and the runner is ready, then the orchestrator may give a mutant to the runner. If there is no job for this runner, the orchestrator will only return an ok.
+
 Status: 200 OK
 
 ```json
@@ -119,8 +132,10 @@ Status: 200 OK
 }
 ```
 
-If the runner is on the blacklist (e.g. has been deregistered from orchestrator)  
+Description: If the runner is on the blacklist (e.g. has been deregistered from orchestrator)
+
 Status: 403 FORBIDDEN
+
 ```json
 {
     "statusCode": 403,
@@ -130,14 +145,20 @@ Status: 403 FORBIDDEN
 ```
 
 ## Upload result
+
+Description: This API is used for the runner to upload the execution result of a mutant.
+
 #### URL
 complete/{runnerUUID}/{projectUUID}
 #### Request
+
+Description: After receiving a mutant from the heartbeat request, the runner will try to execute the mutant. After execution, the mutant id, and execution status and the position of the mutant will be given back to the orchestrator.
+
 Path variables:
 - runnerUUID: uuid of the runner
 - projectUUID: uuid of the project
 
-Request body
+Request body:
 ```json
 {
   "filename": "task.ts",
@@ -163,6 +184,7 @@ Request body
 #### Response
 Status: 200 OK
 Response body
+
 ```json
 {
   "status": "OK"
